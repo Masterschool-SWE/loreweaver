@@ -117,6 +117,34 @@ Metrics: faithfulness, answer relevancy, context precision, context recall.
 
 Ragas 0.4.x currently imports Vertex AI symbols that `langchain-community` 0.4.x removed. `eval/run_eval.py` registers a small placeholder shim so evaluation still runs. Remove it once Ragas ships a compatible release.
 
+## Deploy (DigitalOcean)
+
+One **Basic Droplet, 1 GB / 1 vCPU** (~$6/month). No domain required — open `http://<droplet-ip>`. Add **2 GB of swap** so FastAPI + Streamlit + Chroma fit; without swap the 1 GB box will OOM.
+
+1. Create an Ubuntu 24.04 droplet, add your SSH key, and a firewall allowing **22** and **80** only.
+2. SSH in and install Docker, then add swap:
+
+```bash
+curl -fsSL https://get.docker.com | sh
+fallocate -l 2G /swapfile
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+echo '/swapfile none swap sw 0 0' >> /etc/fstab
+```
+
+3. Copy this repo onto the droplet (git clone or `scp`), then:
+
+```bash
+cp .env.example .env
+# set OPENAI_API_KEY and a real SECRET_KEY in .env
+docker compose up -d --build
+```
+
+First boot ingests the Worldbook (needs the OpenAI key and a minute or two). Then visit `http://<droplet-ip>`. Demo login: `demo` / `demo1234`.
+
+The API stays on the Docker network; only Caddy (port 80 → Streamlit) is public.
+
 ## Security
 
 The Archivist executes model-written SQL. The tool is the trust boundary: it opens the database **read-only**, allows **SELECT only**, rejects multiple statements, and the prompt schema omits the `user` table (password hashes). Never give an LLM a writable database connection.

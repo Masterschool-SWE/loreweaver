@@ -1,0 +1,45 @@
+services:
+  api:
+    build: .
+    command: ["api"]
+    env_file: .env
+    environment:
+      DATABASE_URL: sqlite:////data/loreweaver.db
+      CHECKPOINT_DB_PATH: /data/checkpoints.db
+      CHROMA_DIR: /data/chroma
+      WORLDBOOK_DIR: /app/assets/worldbook
+      RETRIEVAL_MODE: basic
+    volumes:
+      - loreweaver-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 180s
+
+  streamlit:
+    build: .
+    command: ["streamlit"]
+    env_file: .env
+    environment:
+      BACKEND_URL: http://api:8000
+      BACKEND_TIMEOUT: "180"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on:
+      - streamlit
+    restart: unless-stopped
+
+volumes:
+  loreweaver-data:

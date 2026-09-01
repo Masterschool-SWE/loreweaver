@@ -4,11 +4,11 @@ from typing import Iterator
 
 from sqlmodel import Session, SQLModel, create_engine
 
-from .config import DATABASE_URL
+from .config import DATABASE_URL, SQLITE_PATH
 
-# Make sure the folder for the SQLite file exists (no-op for non-sqlite URLs).
+# Create the SQLite file's parent dir (works for both ./data and /data in Docker).
 if DATABASE_URL.startswith("sqlite"):
-    Path("data").mkdir(parents=True, exist_ok=True)
+    Path(SQLITE_PATH).parent.mkdir(parents=True, exist_ok=True)
 
 # check_same_thread=False lets the SQLite connection be shared across FastAPI threads.
 engine = create_engine(

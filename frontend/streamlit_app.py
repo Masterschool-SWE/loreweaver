@@ -29,7 +29,8 @@ def api(method: str, path: str, **kwargs) -> httpx.Response:
     headers = kwargs.pop("headers", {})
     if ss.token:
         headers["Authorization"] = f"Bearer {ss.token}"
-    return httpx.request(method, f"{BACKEND_URL}{path}", headers=headers, timeout=60, **kwargs)
+    timeout = float(os.getenv("BACKEND_TIMEOUT", "180"))
+    return httpx.request(method, f"{BACKEND_URL}{path}", headers=headers, timeout=timeout, **kwargs)
 
 
 def logout():
