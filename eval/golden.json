@@ -1,0 +1,14 @@
+[
+  {"question": "What is the Cinderwyrm weak to?",
+   "reference": "Cold magic and the Tide Shard's water."},
+  {"question": "How much HP does a Healing Draught restore?",
+   "reference": "A third of a hero's maximum HP."},
+  {"question": "What is the challenge rating of the Gloomtide Kraken?",
+   "reference": "15."},
+  {"question": "Which region of Aethelgard holds the Storm Shard?",
+   "reference": "Highreach."},
+  {"question": "How do you permanently destroy an Ashwalker?",
+   "reference": "Shatter its anchor-bone."},
+  {"question": "What does the Tideweave Cloak let the wearer do?",
+   "reference": "Breathe water for up to one hour."}
+]
