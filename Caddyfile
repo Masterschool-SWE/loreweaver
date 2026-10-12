@@ -1,3 +1,3 @@
-:80 {
+loreweaver.masterschool.com {
 	reverse_proxy streamlit:8501
 }

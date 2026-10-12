@@ -20,7 +20,10 @@ def search_worldbook(query: str) -> str:
     Use this for ANY in-world fact you are unsure of: a monster's stats or weakness, an item's
     price or rarity, a rule, or regional lore. Returns the most relevant passages.
     """
-    docs = get_retriever().invoke(query)
+    try:
+        docs = get_retriever().invoke(query)
+    except Exception as exc:
+        return f"Worldbook search failed: {exc}"
     if not docs:
         return "No relevant Worldbook passages found. (Has the Worldbook been ingested yet?)"
     return "\n\n---\n\n".join(
@@ -37,11 +40,21 @@ def ask_archivist(question: str, config: RunnableConfig) -> str:
     inventory?', 'which monster has the highest challenge rating?'. Always include the hero's id
     when the question is about a specific hero.
     """
-    archivist = build_archivist()
-    # Passing `config` through propagates callbacks (e.g. Langfuse) so the sub-agent's work
-    # shows up nested inside the Keeper's trace.
-    result = archivist.invoke({"messages": [{"role": "user", "content": question}]}, config=config)
-    return result["messages"][-1].content
+    try:
+        archivist = build_archivist()
+        # Callbacks only — do not reuse the Keeper's thread_id, or the sub-agent can
+        # write into the same checkpoint and leave dangling tool_calls.
+        child_config = {}
+        if config and config.get("callbacks"):
+            child_config["callbacks"] = config["callbacks"]
+        result = archivist.invoke(
+            {"messages": [{"role": "user", "content": question}]},
+            config=child_config,
+        )
+        content = result["messages"][-1].content
+        return content if isinstance(content, str) else str(content)
+    except Exception as exc:
+        return f"The Archivist could not answer: {exc}"
 
 
 def get_keeper_tools() -> list:

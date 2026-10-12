@@ -10,6 +10,7 @@ from sqlmodel import Session, select
 from ..config import KEEPER_MODEL, KEEPER_TEMPERATURE
 from ..models import Adventure, Hero
 from .keeper import build_keeper
+from .repair import repair_checkpoint
 from .tracing import flush_langfuse, get_langfuse_handler
 
 
@@ -63,7 +64,14 @@ def invoke_keeper(
     if handler:
         config["callbacks"] = [handler]
 
-    result = keeper.invoke({"messages": [{"role": "user", "content": message}]}, config=config)
+    # A prior turn may have checkpointed tool_calls without results; fix that first
+    # so this prompt is not rejected by the model API.
+    repair_checkpoint(keeper, config)
+    try:
+        result = keeper.invoke({"messages": [{"role": "user", "content": message}]}, config=config)
+    except Exception:
+        repair_checkpoint(keeper, config)
+        raise
     if handler:
         flush_langfuse()
     return result["messages"][-1].content

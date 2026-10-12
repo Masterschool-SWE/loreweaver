@@ -110,6 +110,7 @@ Needs `OPENAI_API_KEY` and a store ingested with the **same** embeddings used at
 
 ```bash
 uv run python -m app.agent.rag.ingest --app-dir backend
+uv sync --group eval
 uv run python eval/run_eval.py
 ```
 
@@ -119,7 +120,7 @@ Ragas 0.4.x currently imports Vertex AI symbols that `langchain-community` 0.4.x
 
 ## Deploy (DigitalOcean)
 
-One **Basic Droplet, 1 GB / 1 vCPU** (~$6/month). No domain required — open `http://<droplet-ip>`. Add **2 GB of swap** so FastAPI + Streamlit + Chroma fit; without swap the 1 GB box will OOM.
+One **Basic Droplet, 1 GB RAM / 25 GB disk** (~$6/month). The $4 / 10 GB size is too small for the Docker image. No domain required — open `http://<droplet-ip>`. Add **2 GB of swap** so FastAPI + Streamlit + Chroma fit; without swap the 1 GB box will OOM.
 
 1. Create an Ubuntu 24.04 droplet, add your SSH key, and a firewall allowing **22** and **80** only.
 2. SSH in and install Docker, then add swap:

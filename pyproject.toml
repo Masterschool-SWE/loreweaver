@@ -33,13 +33,13 @@ dependencies = [
     # Pin chromadb's OpenTelemetry exporter to a modern build; the old floor (1.11.x)
     # ships pre-protobuf-4 generated code that crashes under current protobuf.
     "opentelemetry-exporter-otlp-proto-grpc>=1.42",
-    # --- v3: tracing + evaluation ---
+    # --- tracing ---
     "langfuse>=3.0",
-    "ragas>=0.2",
 ]
 
 [dependency-groups]
 dev = ["pytest>=8.0"]
+eval = ["ragas>=0.2"]
 
 [tool.uv]
 package = false
